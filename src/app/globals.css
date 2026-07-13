@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #0d0a05;
+  --foreground: #f4f1ea;
+
+  /* NOXA brand palette */
+  --umber: #91590f;
+  --umber-dark: #55370b;
+  --ochre: #b37c1d;
+  --olive: #415c2b;
+  --bone: #e0e3de;
+  --ink: #1a1409;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: #000;
+  color: var(--foreground);
+  font-family: var(--font-inter), Arial, Helvetica, sans-serif;
+}
+
+/* Keyboard focus ring — only shown on keyboard nav, not mouse clicks */
+:focus-visible {
+  outline: 2px solid var(--ochre);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+@layer utilities {
+  .text-stroke-ochre {
+    -webkit-text-stroke: 2px var(--ochre);
+    paint-order: stroke fill;
+  }
+
+  .mask-fade-edges {
+    mask-image: linear-gradient(
+      to bottom,
+      transparent 0%,
+      black 8%,
+      black 92%,
+      transparent 100%
+    );
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
