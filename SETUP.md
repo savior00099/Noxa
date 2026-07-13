@@ -22,38 +22,32 @@ friendly "not configured yet" message instead of crashing.
    file. Minify it to one line (e.g. `jq -c . serviceAccount.json`) and paste it as
    `FIREBASE_SERVICE_ACCOUNT_KEY` in `.env.local`. This one is server-only — never expose it
    in client code or commit it.
-6. Add these Firestore security rules (Firestore → Rules) so people can only read/write
-   their own data:
-
-   ```
-   rules_version = '2';
-   service cloud.firestore {
-     match /databases/{database}/documents {
-       match /users/{uid} {
-         allow read, write: if request.auth != null && request.auth.uid == uid;
-         match /addresses/{addressId} {
-           allow read, write: if request.auth != null && request.auth.uid == uid;
-         }
-         match /messages/{messageId} {
-           allow read, write: if request.auth != null && request.auth.uid == uid;
-         }
-       }
-       match /orders/{orderId} {
-         allow create: if request.auth != null && request.auth.uid == request.resource.data.uid;
-         allow read: if request.auth != null && request.auth.uid == resource.data.uid;
-         allow update: if false; // only the server (Admin SDK / API routes) updates orders
-       }
-       match /reviews/{reviewId} {
-         allow create: if true;
-         allow read: if false; // reviews are moderated server-side before publishing
-       }
-     }
-   }
-   ```
+6. Copy the contents of [`firestore.rules`](./firestore.rules) in this repo into
+   **Firestore → Rules** in the Firebase console and publish. It locks reads/writes to
+   each signed-in user's own data, and makes order-status updates and review moderation
+   admin-only (done server-side via the Admin SDK, never directly by a client).
 
 7. In **Authentication → Settings → Authorized domains**, add your Vercel domain once deployed.
 
-## 2. Pathao Merchant Courier API
+## 2. Admin panel (`/admin`)
+
+A built-in admin panel lets you manage orders, moderate reviews, and reply to the
+support inbox — all in one place, gated behind Google sign-in.
+
+1. Set `ADMIN_EMAILS` in `.env.local` to a comma-separated list of the Google account
+   email(s) that should have access, e.g. `ADMIN_EMAILS=you@gmail.com`.
+2. Make sure `FIREBASE_SERVICE_ACCOUNT_KEY` is set (step 5 above) — the admin panel's
+   API routes run server-side through the Admin SDK, which bypasses Firestore rules
+   entirely, so access control happens purely through the `ADMIN_EMAILS` check.
+3. Visit `/admin` on your site, sign in with an allowed Google account, and you'll see:
+   - **Orders** — every order, with a status dropdown (Order Placed → ... → Delivered).
+   - **Reviews** — every submitted review, with Publish/Unpublish and Delete.
+   - **Inbox** — every customer's support thread, with a reply box.
+
+Anyone signing in with a non-admin email sees a clear "Not authorized" message instead
+of any data.
+
+## 3. Pathao Merchant Courier API
 
 1. Register as a merchant at [pathao.com](https://pathao.com) and request API access from
    your Merchant Dashboard → **API Credentials**. You'll get a `client_id`, `client_secret`,
@@ -69,7 +63,7 @@ friendly "not configured yet" message instead of crashing.
 Without these, checkout still creates the order in Firestore and shows in the customer's
 "My Orders" tab — it just won't auto-book a Pathao pickup until you add credentials.
 
-## 3. Deploying to Vercel
+## 4. Deploying to Vercel
 
 1. Push this project to a GitHub repo.
 2. In Vercel: **Add New → Project** → import the repo.
@@ -101,3 +95,5 @@ npm run dev
 - **Reviews**: the visible reviews are static/curated; the "Write a review" form at the
   bottom of the Reviews section saves submissions to a `reviews` collection with
   `published: false` for you to review before publishing them yourself.
+- **Admin panel** (`/admin`): manage orders, publish/delete reviews, and reply to
+  customer support threads — gated to the emails in `ADMIN_EMAILS`. See section 2 above.
