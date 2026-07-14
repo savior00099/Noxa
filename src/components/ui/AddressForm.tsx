@@ -62,13 +62,14 @@ export default function AddressForm({ open, onClose, onSaved }: Props) {
             onClick={onClose}
             className="fixed inset-0 z-[110] bg-black/70 backdrop-blur-sm"
           />
-          <motion.div
-            initial={{ y: "100%" }}
-            animate={{ y: 0 }}
-            exit={{ y: "100%" }}
-            transition={{ type: "spring", stiffness: 320, damping: 34 }}
-            className="fixed inset-x-0 bottom-0 z-[120] flex max-h-[88vh] flex-col overflow-y-auto rounded-t-3xl bg-[#0f0f0f] p-6 sm:inset-auto sm:left-1/2 sm:top-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-[440px] sm:rounded-3xl"
-          >
+          <div className="fixed inset-0 z-[120] flex items-end justify-center sm:items-center sm:p-6">
+            <motion.div
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", stiffness: 320, damping: 34 }}
+              className="flex max-h-[88vh] w-full flex-col overflow-y-auto rounded-t-3xl bg-[#0f0f0f] p-6 sm:w-[440px] sm:rounded-3xl"
+            >
             <div className="mb-5 flex items-center justify-between">
               <h2 className="font-display text-xl text-white">Add shipping address</h2>
               <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 text-white/40 hover:text-white text-sm">✕</button>
@@ -134,7 +135,8 @@ export default function AddressForm({ open, onClose, onSaved }: Props) {
             <style>{`.ninput{width:100%;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);border-radius:12px;padding:12px 14px;font-size:14px;color:#fff;outline:none}
             .ninput:focus{border-color:#B37C1D}
             .ninput option{background:#111;color:#fff}`}</style>
-          </motion.div>
+            </motion.div>
+          </div>
         </>
       )}
     </AnimatePresence>
