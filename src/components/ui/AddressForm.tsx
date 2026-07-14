@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
 import { saveAddress, type DeliveryAddress } from "@/lib/firestore";
@@ -28,6 +28,17 @@ export default function AddressForm({ open, onClose, onSaved }: Props) {
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Lock background page scroll while the modal is open, so scrolling
+  // always scrolls the modal's own content, never the page behind it.
+  useEffect(() => {
+    if (!open) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [open]);
 
   const set = (key: keyof DeliveryAddress) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setForm((f) => ({ ...f, [key]: e.target.value }));
@@ -68,13 +79,14 @@ export default function AddressForm({ open, onClose, onSaved }: Props) {
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", stiffness: 320, damping: 34 }}
-              className="flex max-h-[88vh] w-full flex-col overflow-y-auto rounded-t-3xl bg-[#0f0f0f] p-6 sm:w-[440px] sm:rounded-3xl"
+              className="flex max-h-[88vh] w-full flex-col overflow-hidden rounded-t-3xl bg-[#0f0f0f] sm:w-[440px] sm:rounded-3xl"
             >
-            <div className="mb-5 flex items-center justify-between">
+            <div className="flex items-center justify-between border-b border-white/5 px-6 py-5">
               <h2 className="font-display text-xl text-white">Add shipping address</h2>
               <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 text-white/40 hover:text-white text-sm">✕</button>
             </div>
 
+            <div className="flex-1 overflow-y-auto overscroll-contain px-6 py-5" style={{ WebkitOverflowScrolling: "touch" }}>
             <div className="flex flex-col gap-4">
               <Field label="Full Name">
                 <input value={form.fullName} onChange={set("fullName")} placeholder="Abu Sayeed" className="ninput" />
@@ -122,11 +134,14 @@ export default function AddressForm({ open, onClose, onSaved }: Props) {
               </div>
 
               {error && <p className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-xs text-red-300">{error}</p>}
+            </div>
+            </div>
 
+            <div className="border-t border-white/5 px-6 py-4">
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="mt-1 w-full rounded-full bg-[#B37C1D] py-3.5 text-sm font-bold uppercase tracking-wider text-[#1A1409] transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50"
+                className="w-full rounded-full bg-[#B37C1D] py-3.5 text-sm font-bold uppercase tracking-wider text-[#1A1409] transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50"
               >
                 {saving ? "Saving…" : "Save Address"}
               </button>
